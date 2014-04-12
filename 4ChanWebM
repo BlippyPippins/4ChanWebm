@@ -1,15 +1,15 @@
 # Script to generate WebM video for 4Chan using ffmpeg
 
 author="bp"
-title=""
+title="Encoded for 4Chan"
 resolution="-1"
-bitrate="1M"
 slices=4
 lag=16
 cpu=2
 mbLimit=3
 timeLimit=45
 beginTime="00:00:00"
+outFile="out.webm"
 
 usage()
 {
@@ -20,8 +20,8 @@ This script will create WebM videos for 4Chan requirements.
 
 OPTIONS:
 	-h Show this message
-	-i Input media file
-	-o Output media file (webm)
+	-i Input media file (required)
+	-o Output media file (defaults to out.webm)
 	-r Output Resolution (240 for 240p, 720 for 720p, etc... Defaults to -1 (original))
 	-m Target output size in megabytes (default is 3)
 	-b Begin time (ex: 00:32.65.342, defaults to 0)
@@ -29,10 +29,12 @@ OPTIONS:
 	-s Slices (1-3 lowdef, 5-8 highdef, defaults 4)
 	-l Lag in frames (frames to read ahead, 16 default, max 25)
 	-c Total cpu's to use (default is 2)
-	-u Specify alternate subtitle file (defaults to the input media file but with a .ass extension)
-	-a Author ex: "John Doe", use quotes if including spaces, etc.
-	-t Title ex: "My Title", use quotes if including spaces, etc.
+	-u Specify alternate subtitle file (defaults to source filename but with a .ass extension)
+	-a Author ex: "John Doe"
+	-t Title ex: "My Title"
 	-v View 4ChanWebM history (show previous commands used)
+
+	For any parameter which is more than one word, use quotes to surround it.
 
 EOF
 }
@@ -89,6 +91,12 @@ while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
 			;;
 	esac
 done
+
+if [ -z $inFile ] || [ ! -r $inFile ];
+then
+	echo You must specify a readable media file to convert. Ex: -i movie.mkv
+	exit 2
+fi
 
 path="${inFile%/*}"
 if [[ $path == $inFile ]];
