@@ -2,7 +2,7 @@
 
 author="bp"
 title="Encoded for 4Chan"
-resolution="-1"
+resolution="360"
 slices=4
 lag=16
 cpu=2
