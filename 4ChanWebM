@@ -39,7 +39,7 @@ OPTIONS:
 EOF
 }
 
-while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
+while getopts "hi:o:r:m:b:e:s:l:c:u:a:t:v" OPTION; do
 	case $OPTION in
 		h)
 			usage
@@ -73,7 +73,7 @@ while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
 			cpu=$OPTARG
 			;;
 		u)
-			subitle=$OPTARG
+			subtitle=$OPTARG
 			;;
 		a)
 			author=$OPTARG
@@ -92,7 +92,7 @@ while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
 	esac
 done
 
-if [ -z $inFile ] || [ ! -r $inFile ];
+if [[ -z $inFile ]] || [[ ! -r $inFile ]];
 then
 	echo You must specify a readable media file to convert. Ex: -i movie.mkv
 	exit 2
@@ -109,7 +109,11 @@ fi
 filename=$(basename "$inFile")
 extension="${filename##*.}"
 filename="${filename%.*}"
-subtitle="$path$filename.ass"
+
+if [[ -z $subtitle ]];
+then
+	subtitle="$path$filename.ass"
+fi
 
 bitrate=$(($mbLimit*8192/$timeLimit))"K"
 history="4ChanWebM -i \"$inFile\" -o \"$outFile\" -r $resolution -m $mbLimit -b $beginTime -e $timeLimit -s $slices -l $lag -c $cpu -u $subtitle -a \"$author\" -t \"$title\""
