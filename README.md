@@ -5,10 +5,10 @@ Create WebM files easily for 4Chan
 
 Basic Usage:
 
-4ChanWebM -i input.mkv -o output.webm -b 00:01:35 -e 30 -t "Title"
+4ChanWebM -i input.mkv
 
-Effectively, the above example will pull video from the source file (input.mkv). It will pull a video clip clip without audio starting at 1 min 35 seconds into the video and generate 30 seconds of video. It will export that video to output.webm, attaching the metadata title="Title" as well. If there is a subtitle file with the same filename as the input file (ex: input.ass) it will hard-code those subtitles into the final video as well.
+Effectively, the above command will create a webm defaulting all values to defaults. The result will be a file named "out.webm", which will reside in the current path. The video will retain it's original resolution, it will be limited to 3MB's, it will record 45 seconds of video starting from the beginning. The encoder will use 4 slices with 16 lag-in-frames and use 2 threads for the encoding. If there is a subtitle file with the same filename as the source file with a .ass extension, it will burn the subtitles to the video as well. The default author and title will be added to the metadata of the video. "(bp) Encoded for 4Chan".
 
-For more information on how to use, execute 4ChanWebM -h to see more advanced options. FFMpeg with the libass library enabled is required for 4ChanWebM to work.
+For more information on how to use, execute 4ChanWebM -h to see more advanced options.
 
-For effective use, you MUST declare the -i, -o and -e parameters. The -e parameter is required otherwise it cannot properly determine the bitrate for the resulting video.
+4ChanWebM is merely a script which is a wrapper for FFMpeg which requires the libass library enabled.
