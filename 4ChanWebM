@@ -29,6 +29,7 @@ OPTIONS:
 	-s Slices (1-3 lowdef, 5-8 highdef, defaults 4)
 	-l Lag in frames (frames to read ahead, 16 default, max 25)
 	-c Total cpu's to use (default is 2)
+	-u Specify alternate subtitle file (defaults to the input media file but with a .ass extension)
 	-a Author ex: "John Doe", use quotes if including spaces, etc.
 	-t Title ex: "My Title", use quotes if including spaces, etc.
 	-v View 4ChanWebM history (show previous commands used)
@@ -69,6 +70,9 @@ while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
 		c)
 			cpu=$OPTARG
 			;;
+		u)
+			subitle=$OPTARG
+			;;
 		a)
 			author=$OPTARG
 			;;
@@ -86,13 +90,21 @@ while getopts "hi:o:r:m:b:e:s:l:c:a:t:v" OPTION; do
 	esac
 done
 
+path="${inFile%/*}"
+if [[ $path == $inFile ]];
+then
+	path="";
+else
+	path=$path"/"
+fi
+
 filename=$(basename "$inFile")
 extension="${filename##*.}"
 filename="${filename%.*}"
-subtitle="$filename.ass"
+subtitle="$path$filename.ass"
 
 bitrate=$(($mbLimit*8192/$timeLimit))"K"
-history="4ChanWebM -i \"$inFile\" -o \"$outFile\" -r $resolution -m $mbLimit -b $beginTime -e $timeLimit -s $slices -l $lag -a \"$author\" -t \"$title\""
+history="4ChanWebM -i \"$inFile\" -o \"$outFile\" -r $resolution -m $mbLimit -b $beginTime -e $timeLimit -s $slices -l $lag -c $cpu -u $subtitle -a \"$author\" -t \"$title\""
 echo $history>>~/.4ChanWebMHistory
 
 if [ -f "$subtitle" ];
@@ -105,4 +117,3 @@ else
 fi
 
 rm ffmpeg2pass-0.log
-#mplayer --loop=0 -fs $outFile
