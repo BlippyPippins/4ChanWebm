@@ -30,6 +30,8 @@ OPTIONS:
 	-l Lag in frames (frames to read ahead, 16 default, max 25)
 	-c Total cpu's to use (default is 2)
 	-u Specify alternate subtitle file (defaults to source filename but with a .ass extension)
+	-f Optional ffmpeg filters you would like apply ex: "crop=100:200:10:20, edgedetect"
+	-p Optional ffmpeg paramaters you would like to apply ex: "-loglevel quiet"
 	-a Author ex: "John Doe"
 	-t Title ex: "My Title"
 	-v View 4ChanWebM history (show previous commands used)
@@ -39,7 +41,25 @@ OPTIONS:
 EOF
 }
 
-while getopts "hi:o:r:m:b:e:s:l:c:u:a:t:v" OPTION; do
+getBeginTimeSecs()
+{
+	read hours mins secs <<<$(IFS=":"; echo $beginTime)
+
+	hours=$(($hours*60*60))
+	mins=$(($mins*60))
+	beginTimeSecs=$(($hours+$mins+$secs))
+
+	if [[ $beginTimeSecs -gt 9 ]];
+	then
+		beginTimeSecs=$(($beginTimeSecs-5))
+		beginTimeSecsSlow=5
+	else
+		beginTimeSecsSlow=$beginTimeSecs
+		beginTimeSecs=0
+	fi
+}
+
+while getopts "hi:o:r:m:b:e:s:l:c:u:f:p:a:t:v" OPTION; do
 	case $OPTION in
 		h)
 			usage
@@ -75,6 +95,12 @@ while getopts "hi:o:r:m:b:e:s:l:c:u:a:t:v" OPTION; do
 		u)
 			subtitle=$OPTARG
 			;;
+		f)
+			filters=", "$OPTARG
+			;;
+		p)
+			params=" "$OPTARG
+			;;
 		a)
 			author=$OPTARG
 			;;
@@ -91,6 +117,8 @@ while getopts "hi:o:r:m:b:e:s:l:c:u:a:t:v" OPTION; do
 			;;
 	esac
 done
+
+getBeginTimeSecs
 
 if [[ -z $inFile ]] || [[ ! -r $inFile ]];
 then
@@ -121,11 +149,14 @@ echo $history>>~/.4ChanWebMHistory
 
 if [ -f "$subtitle" ];
 then
-	ffmpeg -ss $beginTime -i "$inFile" -vf "scale=-1:$resolution, ass=$subtitle" -t $timeLimit -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 1 -f webm /dev/null -y
-	ffmpeg -ss $beginTime -i "$inFile" -vf "scale=-1:$resolution, ass=$subtitle" -t $timeLimit -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 2 -metadata title="($author) $title" "$outFile" -y
+	ffmpeg -ss $beginTimeSecs -i "$inFile" -vf "scale=-1:$resolution, ass=$subtitle$filters" -ss $beginTimeSecsSlow -t $timeLimit$params -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 1 -f webm /dev/null -y
+	ffmpeg -ss $beginTimeSecs -i "$inFile" -vf "scale=-1:$resolution, ass=$subtitle$filters" -ss $beginTimeSecsSlow -t $timeLimit$params -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 2 -metadata title="($author) $title" "$outFile" -y
 else
-	ffmpeg -ss $beginTime -i "$inFile" -vf scale=-1:$resolution -t $timeLimit -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 1 -f webm /dev/null -y
-	ffmpeg -ss $beginTime -i "$inFile" -vf scale=-1:$resolution -t $timeLimit -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 2 -metadata title="($author) $title" "$outFile" -y
+	ffmpeg -ss $beginTimeSecs -i "$inFile" -vf "scale=-1:$resolution$filters" -ss $beginTimeSecsSlow -t $timeLimit$params -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 1 -f webm /dev/null -y
+	ffmpeg -ss $beginTimeSecs -i "$inFile" -vf "scale=-1:$resolution$filters" -ss $beginTimeSecsSlow -t $timeLimit$params -an -c:v libvpx -b:v $bitrate -quality best -slices $slices -auto-alt-ref 1 -lag-in-frames $lag -threads $cpu -pass 2 -metadata title="($author) $title" "$outFile" -y
 fi
 
-rm ffmpeg2pass-0.log
+if [[ -r "ffmpeg2pass-0.log" ]];
+then
+	rm ffmpeg2pass-0.log
+fi
