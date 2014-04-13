@@ -34,7 +34,7 @@ OPTIONS:
 	-f Optional ffmpeg filters you would like apply ex: "crop=100:200:10:20, edgedetect"
 	-p Optional ffmpeg paramaters you would like to apply ex: "-loglevel quiet"
 	-x Speedplay start time - speedup source video to fit within time frame
-	   (truncate 1 hr into 2 mins, etc. Must start time of source video in seconds as parameter)
+	   (truncate 1 hr into 2 mins, etc. Must use end time of source as parameter ex: 01:23:17)
 	-a Author ex: "John Doe"
 	-t Title ex: "My Title"
 	-v View 4ChanWebM history (show previous commands used)
@@ -82,35 +82,10 @@ speedPlay()
 	getEndSpeedplaySecs
 
 	speedLength=$(($spEndTimeSecs-$beginTimeSecs-5))
-	pts=$(($speedLength/$timeLimit))
-
-#	variable=$(echo "OPTIONS; OPERATIONS" | bc)
-
-#	pts=$((echo "'$speedLength/$timeLimit'" | bc -l))
-
-#echo "$IMG_WIDTH $IMG2_WIDTH" | awk '{printf "%.2f \n", $1/$2}'
-#
-#	var=$(awk -v m=$m 'BEGIN { print 1 - ((m - 20) / 34) }')
-#	pts=$(awk 'BEGIN { printf "%.2f ", $speedLength/$timeLimit}')
-
-#	bc -l <<< '100/3'
-#	pts=$((bc <<< '$speedLength/$timeLimit'))
-
-#	echo awk 'BEGIN {print $speedLength/$timeLimit}'
-#	pts=`awk 'BEGIN {printf "%.2f", $speedLength/$timeLimit}'`
-#
-
 	pts=`echo $speedLength*60/$timeLimit|bc -l`
 
 	speedplay=", setpts=(60/$pts)*PTS"
 	filters=$filters$speedplay
-
-	echo Time Limit: $timeLimit
-	echo End Time: $spEndTimeSecs - $beginTimeSecs - 5
-	echo Speed Length: $speedLength
-	echo PTS: $pts
-	echo Filter: $filters
-	read a
 }
 
 while getopts "hi:o:r:m:b:e:s:l:c:u:f:p:x:a:t:v" OPTION; do
