@@ -33,7 +33,7 @@ OPTIONS:
 	-u Specify alternate subtitle file (defaults to source filename but with a .ass extension)
 	-f Optional ffmpeg filters you would like apply ex: "crop=100:200:10:20, edgedetect"
 	-p Optional ffmpeg paramaters you would like to apply ex: "-loglevel quiet"
-	-x Speedplay start time - speedup source video to fit within time frame
+	-x Speedplay end time - speedup source video to fit within time frame
 	   (truncate 1 hr into 2 mins, etc. Must use end time of source as parameter ex: 01:23:17)
 	-a Author ex: "John Doe"
 	-t Title ex: "My Title"
